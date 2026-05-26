@@ -3,3 +3,4 @@ node_modules/
 backend/public/uploads/*
 !backend/public/uploads/.gitkeep
 backend/src/generated/prisma/
+frontend/build/

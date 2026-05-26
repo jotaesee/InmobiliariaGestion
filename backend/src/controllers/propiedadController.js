@@ -7,8 +7,10 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 export const getAll = async (req, res) => {
-  const { estado } = req.query
-  const where = estado ? { estado } : {}
+  const { estado, idVendedor } = req.query
+  const where = {}
+  if (estado) where.estado = estado
+  if (idVendedor) where.idVendedor = Number(idVendedor)
   const propiedades = await prisma.propiedad.findMany({
     where,
     include: {
@@ -39,21 +41,22 @@ export const getById = async (req, res) => {
 export const create = async (req, res) => {
   const {
     idVendedor, direccion, idZona, descripcion,
-    habitaciones, cantidadBanos, metrosCuadrados, precio
+    habitaciones, cantidadBanos, metrosCuadrados, precio, estado
   } = req.body
 
-  const propiedad = await prisma.propiedad.create({
-    data: {
-      idVendedor: Number(idVendedor),
-      direccion,
-      idZona: Number(idZona),
-      descripcion,
-      habitaciones: Number(habitaciones),
-      cantidadBanos: Number(cantidadBanos),
-      metrosCuadrados: Number(metrosCuadrados),
-      precio: Number(precio)
-    }
-  })
+  const data = {
+    idVendedor: Number(idVendedor),
+    direccion,
+    idZona: Number(idZona),
+    descripcion,
+    habitaciones: Number(habitaciones),
+    cantidadBanos: Number(cantidadBanos),
+    metrosCuadrados: Number(metrosCuadrados),
+    precio: Number(precio)
+  }
+  if (estado) data.estado = estado
+
+  const propiedad = await prisma.propiedad.create({ data })
 
   if (req.files && req.files.length > 0) {
     const imagenes = req.files.map((file, index) => ({
@@ -76,7 +79,7 @@ export const update = async (req, res) => {
   const { id } = req.params
   const {
     direccion, idZona, descripcion,
-    habitaciones, cantidadBanos, metrosCuadrados, precio
+    habitaciones, cantidadBanos, metrosCuadrados, precio, estado
   } = req.body
 
   const data = {}
@@ -87,6 +90,7 @@ export const update = async (req, res) => {
   if (cantidadBanos !== undefined) data.cantidadBanos = Number(cantidadBanos)
   if (metrosCuadrados !== undefined) data.metrosCuadrados = Number(metrosCuadrados)
   if (precio !== undefined) data.precio = Number(precio)
+  if (estado !== undefined) data.estado = estado
 
   const propiedad = await prisma.propiedad.update({
     where: { id: Number(id) },
