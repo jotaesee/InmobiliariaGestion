@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  engineType      = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum estadoPropiedad {
+  DISPONIBLE
+  VENDIDA
+  ARCHIVADA
+}
+
+model cliente {
+  id Int @id
+  nombre String
+  telefono String
+  email String
+  propiedades propiedad[]
+  compras venta[]
+}
+
+model propiedad {
+  id Int @id @default(autoincrement())
+  idVendedor Int
+  vendedor cliente @relation(fields: [idVendedor], references: [id])
+  direccion String
+  idZona  Int
+  zona zona @relation(fields: [idZona], references: [id])
+  descripcion String
+  habitaciones Int
+  cantidadBanos Int
+  metrosCuadrados Float
+  precio Float
+  estado estadoPropiedad @default(DISPONIBLE)
+  venta venta?
+  imagenes imagen[]
+}
+
+model venta {
+  id Int @id @default(autoincrement())
+  idComprador Int
+  Comprador cliente @relation(fields: [idComprador], references: [id])
+  fecha DateTime
+  montoTotal Float
+  idPropiedad Int @unique
+  propiedad propiedad @relation(fields: [idPropiedad], references: [id])
+}
+
+model zona {
+  id Int @id @default(autoincrement())
+  nombre String
+  propiedades propiedad[]
+}
+
+model imagen {
+  id Int @id @default(autoincrement())
+  url String
+  esPortada Boolean @default(false)
+  
+  idPropiedad Int
+  propiedad propiedad @relation(fields: [idPropiedad], references: [id])
+}
